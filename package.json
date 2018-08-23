@@ -4,7 +4,8 @@
   "description": "Blog API",
   "main": "index.js",
   "scripts": {
-    "start": "server.js"
+    "start": "server.js",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -17,8 +18,11 @@
   },
   "homepage": "https://github.com/lakerfan1994/blog-api-2#readme",
   "dependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
     "express": "^4.16.3",
     "jsonparser": "^1.0.1",
+    "mocha": "^5.2.0",
     "morgan": "^1.9.0",
     "uuid": "^3.3.2"
   }
