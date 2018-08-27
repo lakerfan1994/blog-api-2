@@ -2,43 +2,62 @@ const express = require('express');
 const app = express();
 const router = require('./blog-post-router');
 const morgan = require("morgan");
+const mongoose = require("mongoose");
+const {DATABASE_URL, PORT} = require("./config");
+
 
 app.use(morgan('common'));
+mongoose.Promise = global.Promise;
 
 
+app.use('/blogs', router);
+app.use('*', (req, res) => {
+  res.status(404).send("Endpoint not found");
+})
 
-app.use('/blog-posts', router);
 
-
-function runServer() {
-    const port = process.env.PORT || 8080;
+function runServer(databaseUrl, port =PORT) {
     return new Promise((resolve, reject) => {
-      server = app
-        .listen(port, () => {
-          console.log(`Your app is listening on port ${port}`);
-          resolve(server);
-        })
-        .on("error", err => {
-          reject(err);
-        });
-    });
-  }
+      mongoose.connect(
+        databaseUrl,
+        err => {
+          if(err) {
+            return reject(err);
+          }
+          server = app
+            .listen(port, () => {
+              console.log(`Your app is listening on port ${port}`);
+              resolve();
+            })
+            .on("error", err => {
+              mongoose.disconnect();
+              reject(err);
+            });
+        }
+      );
+    })
+  };
 
 
  function closeServer() {
-  return new Promise((resolve, reject) => {
-    console.log("Closing server");
-    server.close(err => {
-      if (err) {
-        reject(err);
-        // so we don't also call `resolve()`
-        return;
-      }
-      resolve();
+    return mongoose.disconnect().then(() => {
+      return new Promise((resolve, reject) => {
+        console.log("Closing server");
+        server.close(err => {
+          if (err) {
+            return reject(err);
+          }
+          resolve();
+        });
+      });
     });
-  });
-}
+};
 
+//clever!!! this basically allows for the app to run and use the DATABASE url if and only if the app is run from the server,
+//and not from somewhere else
+if (require.main === module) {
+  runServer(DATABASE_URL).catch(err => console.log(err));
+}
 
 
 
