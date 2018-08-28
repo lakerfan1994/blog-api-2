@@ -57,7 +57,7 @@ function runServer(databaseUrl, port =PORT) {
 //and not from somewhere else
 if (require.main === module) {
   runServer(DATABASE_URL).catch(err => console.log(err));
-}
+};
 
 
 

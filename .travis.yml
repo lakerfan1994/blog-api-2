@@ -1,9 +1,0 @@
-language: node_js
-node_js: node
-deploy: https://peaceful-coast-64367.herokuapp.com/ 
-  provider: heroku
-  api_key:
-    secure: rZTdq4JdxljCu8cQP9a+JySM4eSxVpBaDJrbjRW3NImdrlY1umVvxQbdSTKv1A4PZWdQt159WpCEBDxbH89ZgQUMWqydaMBEiDrvJWjdOCwO3EXz5JbDLfCFfAmD9T6eYAibvboiqVVIZL7o+U+ZNQbzVqNddiVi/m5PMR39089guxFKrgtc3tJ8V11dBru3hV80m6X+9Ve8oy/hEUrNiAu6iv0JvWYgWz+ZUaZBH8r4bcCKVjw66MLVB4k8Ii6GFh6kt1ul363ZIKOaT9AiiCUFd9LbbicRpBQWOV5lRbaKJMNAFi6zL0HhwIbIoJYv/8p8efMkeDVwfBQ1xvNDkz90wej10P5JVhxFzrLQ8dpV1NF5UoezgFakelQ6hSz+1hfsb266f7D9ACQO2YIPIR9p4l+DM/PA8uosRkgvCxgwyQnX7chIn7QN0nBD72/ZwpkpF6ZWiDGabEEQrdKJwyJtLk/kTJ3o316Z4wy5ji0jmd5lZaVMCeVTudDv3rdX3aH0RApE0Xux63r0yMcXqWRDl/rybSEXvJTrTyOA3gT4CzYl5DVZ48YjtlZ7XWdLItlMMG6zLun6X5Qn5BOXlQ9jHtCVrdJ/G70RPnoVa624pEcTN2umo1FTnBaPGnGLIwkFcwsHrM9NSKp3+kd3X0NIWS2nt2xfqxXr4/VC/yw=
-  app: blog-api-2
-  on:
-    repo: lakerfan1994/blog-api-2
