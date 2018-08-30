@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const router = require('./blog-post-router');
+const router2 = require('./author-router');
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const {DATABASE_URL, PORT} = require("./config");
@@ -11,9 +12,12 @@ mongoose.Promise = global.Promise;
 
 
 app.use('/blogs', router);
+app.use('/authors', router2);
 app.use('*', (req, res) => {
   res.status(404).send("Endpoint not found");
-})
+});
+
+
 
 
 function runServer(databaseUrl, port =PORT) {

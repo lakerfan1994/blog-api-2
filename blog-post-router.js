@@ -1,12 +1,14 @@
 let express = require("express");
 let router = express.Router();
-const {Blog} = require('./models')
+const {Blogpost} = require('./models');
+const {Author} = require('./models');
 const jsonParser = express.json();
 
 
 
 router.get('/', (req, res) => {
-	Blog.find().limit(20).then((items) => {
+	Blogpost.find().limit(20).then((items) => {
+		console.log(items);
 		res.json(
 			items.map(
 				(item) => item.serialize()	 
@@ -19,8 +21,8 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:id', (req, res) => {
-	Blog.findById(req.params.id).then((item) => {
-		res.json(item.serialize());
+	Blogpost.findById(req.params.id).then((item) => {
+		res.json(item.serializeWithComments());
 	}).catch(err => {
 		console.log(err);
 		res.status(500).send("Internal server error");
@@ -29,19 +31,26 @@ router.get('/:id', (req, res) => {
 
 
 router.post('/', jsonParser, (req, res) => {
-	const neededKeys = ["title", "content", "author"];
+	const neededKeys = ["title", "content", "author_id"];
 	for(let i = 0; i < neededKeys.length - 1; i++) {
 		const key = neededKeys[i];
 		if(!(key in req.body)) {	
 			res.send(`Error, ${key} is not in the request body`);
 		};
 	};
-	const newObject = { title: req.body.title, content: req.body.content, author: req.body.author}
-	Blog.create(newObject).then(function(item){
-		res.json(item.serialize()).status(201);
-	}).catch(err => {
+
+	Author.findById(req.body.author_id).then((author) => {
+		const newObject = { title: req.body.title, content: req.body.content, author: author, 
+		publishDate: Date.now(), comments: []};
+		Blogpost.create(newObject).then(function(item){
+			res.json(item.serializeWithComments()).status(201);
+		}).catch(err => {
+			console.log(err);
+			res.status(500).send("internal server error");
+			});
+	}).catch((err) => {
 		console.log(err);
-		res.status(500).send("internal server error");
+		res.status(400).send("Author not found in collection");
 	});
 });
 
@@ -64,15 +73,16 @@ router.put('/:id',jsonParser, (req, res) => {
 	};
 
 	const fields = {};
-	const updateableFields = ['title', 'content', 'author'];
+	const updateableFields = ['title', 'content'];
 	for(let i = 0; i < updateableFields.length; i++){
-		if(updateableFields[i] in req.body) {
-			console.log(updateableFields[i]);	
+		if(updateableFields[i] in req.body) {	
 			fields[updateableFields[i]] = req.body[updateableFields[i]];
-		}
+		};
 	}
 
-	Blog.findByIdAndUpdate({_id: req.params.id}, {$set: fields}).then((item) =>
+	console.log(fields);
+
+	Blogpost.findByIdAndUpdate({_id: req.params.id}, {$set: fields}, {new: true}).then((item) =>
 		res.json(item.serialize())).catch((err) => {
 			console.log(err);
 			res.status(500).send("Internal server error");
@@ -80,12 +90,6 @@ router.put('/:id',jsonParser, (req, res) => {
 
 	
 })
-
-
-
-
-
-
 
 
 
