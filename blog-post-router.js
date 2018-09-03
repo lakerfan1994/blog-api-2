@@ -6,10 +6,10 @@ const jsonParser = express.json();
 
 
 
+
 router.get('/', (req, res) => {
 	Blogpost.find().limit(20).then((items) => {
-		console.log(items);
-		res.json(
+		res.status(203).json(
 			items.map(
 				(item) => item.serialize()	 
 			)
@@ -53,7 +53,7 @@ router.post('/', jsonParser, (req, res) => {
 		res.status(400).send("Author not found in collection");
 	});
 });
-
+	
 router.delete('/:id', (req, res) => {
 	Blog.findByIdAndDelete({_id: req.params.id}).
 	then(res.status(204).end()).

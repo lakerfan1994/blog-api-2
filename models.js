@@ -55,7 +55,7 @@ blogPostsSchema.methods.serialize = function() {
     id: this._id,
     title: this.title,
     content: this.content,
-    author: this.authorName,
+  //  author: this.authorName,
     publishDate: this.publishDate
   };
 };

@@ -1,83 +1,118 @@
 const chai = require('chai');
+const mocha = require('mocha');
 const chaiHttp = require("chai-http");
+const mongoose = require('mongoose');
+const faker = require('faker');
+const {Blogpost} = require('../models');
+const {Author} = require('../models');
+const {TEST_DATABASE_URL} = require('../config');
 
 const {app, runServer, closeServer} = require("../server");
 
 const expect = chai.expect;
-const expectedKeys = ['title', 'content', 'author', 'publishDate', "id"];
-
 
 chai.use(chaiHttp);
 
+function generateAuthor() {
+  return {
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    userName: faker.internet.userName(),
+  }
+};
 
-describe('Blog methods', function(){
-
-	before(function(){
-   		 return runServer;
- 	 });
-
- 	after(function(){
-  		 return closeServer;
-  	});
-
-
-  	it('should produce a proper GET request', function(){
-  		return chai.request(app).get('/blog-posts').then(function(res){
-  			expect(res.status === 200).to.be.true;
-  			expect(res).to.be.json;
-  			res.body.forEach((item) => {
-  				expect(item).to.include.keys(expectedKeys);
-  			})
-  		})
-  	})
-
-
-  	it('should produce a proper POST request', function(){
-  		const item = {'title': "Lakeshow", "content": "Lorem ipsum", "author": "Chuck"};
-  		return chai.request(app).post('/blog-posts').send(item).then(function(res){
-  			expect(res.status === 201).to.be.true;
-  			expect(res).to.be.json;
-  			expect(res).to.be.a('object');
-  			expect(res.body).to.include.keys(expectedKeys);
-  			expect(res.body.id).to.not.equal(null);
-  		});
-  	});
+function generateBlogData() {
+  return Author.create(generateAuthor())
+    .then(author => {
+      console.log(`AUTHOR ${author}`);
+      return {
+         title: faker.commerce.productName(),
+         content: faker.lorem.paragraph(),
+         comments: {content: faker.lorem.sentence()},
+         publishDate: faker.date.past(),
+         author: author
+     }
+    })
+    .catch(err => {
+      console.log(err);
+    })
+}
 
 
+function seedBlogDatabase() {
+  // let seedData = [];
+  // Author.create(generateAuthor())
+  // .then((_author) => {
+  //   for(let i = 0; i < 3; i++){
+  //   let blog = generateBlogData();
+  //   blog.author = _author
+  //   console.log(`BLOG ${blog}`);
+  //   seedData.push(blog);
+  //  }
+  // })
+  // console.log(`SEEDDATA ${seedData}`);
+  // return Blogpost.insertMany(seedData);
+  console.info('seeding restaurant data');
+  const seedData = [];
 
-  	it('should produce a proper PUT request', function(){
-  		const item = {'title': "Lakeshow", "content": "Lorem ipsum", "author": "Chuck"};
-  		return chai.request(app).get('/blog-posts').then(function(res){
-  			item.id = res.body[0].id;
-  			id = item.id;
-  		});
+  for (let i=1; i<=3; i++) {
+      generateBlogData().then(blog => {
+      console.log(` BLOG ${blog}`);
+      seedData.push(blog);
+    });
+  }
+  // this will return a promise
+  console.log(`SEEDDATA ${seedData}`);
+  return Blogpost.insertMany(seedData);
+};
 
-  		return chai.request(app).put(`/blog-posts${id}`).send(item).then(function(){
-  			expect(res.status === 204).to.be.true;
-  			expect(res.body).to.be(null);
-  		});
-  	});
-
-  	it('should produce a proper DELETE request',function(){
-  		let deletedItem = 0;
-  		let id = 0; 
-  		return chai.request(app).get('/blog-posts'). then(function(res){
-  			deletedItem = res.body[0];	
-  			id = deletedItem.id;	
-  		});
-
-  		return chai.request(app).delete(`/blog-posts/${id}`).send(deletedItem).then(function(res){
-  			expect(res.status === 204).to.be.true;
-  			expect(res.body).to.be(null);
-  		})
-
-
-  	})
+function tearDownDb() {
+  console.warn("Deleting the database");
+  return mongoose.connection.dropDatabase();
+}
 
 
 
 
 
+describe('Blog API Resource', function(){  
+
+  before(function(){
+       return runServer(TEST_DATABASE_URL);
+   });
+
+  beforeEach(function(){
+    return seedBlogDatabase();
+  })
+
+  afterEach(function(){
+    return tearDownDb();
+  })
+
+  after(function(){
+       return closeServer;
+  });
+
+  describe('GET endpoint', function(){
+
+    let res;
+
+    it('should return all blogposts in the entire database', function() {
+      
+      let res;
+      return chai.request(app)
+      .get('/blogs')
+      .then((_res) => {
+        res = _res;
+        console.log(`${res}`);
+        expect(res).to.have.status(203);
+      })
+
+    })
+
+
+
+  })
 
 
 
@@ -86,19 +121,5 @@ describe('Blog methods', function(){
 
 
 
+});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-})
